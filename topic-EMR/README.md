@@ -5,4 +5,4 @@
 
 ## Labs
 
-1. Lab1 - Create EMR with terraform. [Link](/topic-EMR/lab1/README.md)
+1. Lab1 - Create EMR with terraform. [Link](/topic-EMR/lab1/)

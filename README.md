@@ -5,6 +5,6 @@ This allows me to revisit concepts and ideas that I have learnt overtime.
 
 ## March 2024
 
-| Topic | Description      | Link                        |
-| ----- | ---------------- | --------------------------- |
-| EMR   | Creating cluster | [link](topic-EMR/README.md) |
+| Topic | Description      | Link               |
+| ----- | ---------------- | ------------------ |
+| EMR   | Creating cluster | [link](topic-EMR/) |

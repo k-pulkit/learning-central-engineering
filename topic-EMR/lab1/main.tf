@@ -75,14 +75,14 @@ module "emr_instance_group" {
     name           = "master-group"
     instance_count = 1
     instance_type  = "m5.xlarge"
-    # bid_price      = "0.25"
+    bid_price      = "0.25"
   }
 
   core_instance_group = {
     name           = "core-group"
     instance_count = 1
     instance_type  = "c4.2xlarge"
-    # bid_price      = "0.25"
+    bid_price      = "0.25"
   }
 
   ebs_root_volume_size = 64
@@ -100,7 +100,7 @@ module "emr_instance_group" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      cidr_blocks = [module.vpc.vpc_cidr_block]
+      cidr_blocks = ["0.0.0.0/0"]     // Allow traffic coming from EC2 instance connect endpoint
     }
     "rule2" = {
       description = "Allow all egress traffic"
@@ -108,9 +108,29 @@ module "emr_instance_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["0.0.0.0/0"]     // Outbound traffic is okay as internet access may be needed later
     }
   }
+
+  slave_security_group_rules = {
+    "rule1" = {
+      description = "Allow ssh ingress traffic"
+      type        = "ingress"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]     // Allow traffic coming from EC2 instance connect endpoint
+    }
+    "rule2" = {
+      description = "Allow all egress traffic"
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]     // Outbound traffic is okay as internet access may be needed later
+    }
+  }
+
 
   keep_job_flow_alive_when_no_steps = true
   list_steps_states                 = ["PENDING", "RUNNING", "CANCEL_PENDING", "CANCELLED", "FAILED", "INTERRUPTED", "COMPLETED"]
@@ -125,68 +145,55 @@ module "emr_instance_group" {
 
 }
 
-########################
-#     EC2 instance     #
-########################
 
-// Create an EC2 to allow ssh access to private EMR cluster
-module "ec2_instance" {
-  source = "terraform-aws-modules/ec2-instance/aws"
+#################################
+#     EC2 Instance Connect      #
+#################################
 
-  name = "${local.name}-EMR-Login"
-
-  instance_type               = "t2.micro"
-  key_name                    = "Login-1"
-  monitoring                  = true
-  vpc_security_group_ids      = [module.ec2_instance_sg.security_group_id]
-  subnet_id                   = element(module.vpc.public_subnets, 0)
-  associate_public_ip_address = true
-
+// Endpoint to connect to nodes
+resource "aws_ec2_instance_connect_endpoint" "ec2connect" {
+  subnet_id = element(module.vpc.private_subnets, 0)
+  security_group_ids = [ module.ec2connect_endpoints_sg.security_group_id ]
   tags = var.tags
-
-  depends_on = [module.ec2_instance_sg]
 }
 
-module "ec2_instance_sg" {
+module "ec2connect_endpoints_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = "${local.vpc_name}-ec2-sg"
-  description = "Security group for EC2 access"
+  name        = "${local.name}-ec2connect-endpoints"
+  description = "Security group for VPC endpoint access for EC2 instances"
   vpc_id      = module.vpc.vpc_id
 
   ingress_with_cidr_blocks = [
     {
-      rule        = "ssh-tcp"
-      description = "VPC CIDR SSH"
+      description = "All ingress"
       cidr_blocks = "0.0.0.0/0"
-    }
+      from_port = "22"
+      to_port = "22"
+      protocol = "tcp"
+    },
   ]
 
-  egress_with_cidr_blocks = [
+  egress_with_cidr_blocks = [ 
     {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "Allow all egress"
-      cidr_blocks = "0.0.0.0/0"
+      description = "All outbound ok for testing"
+      cidr_blocks = module.vpc.vpc_cidr_block
+      from_port = "0"
+      to_port = "0"
+      protocol = "-1"
     }
-  ]
+   ]
 
   tags = var.tags
-
-  depends_on = [module.vpc]
-
 }
-
-################################################################################
-# Supporting Resources
-################################################################################
 
 
 ########################
 #     VPC for EMR      #
 ########################
+
+// Connection String: aws ec2-instance-connect ssh --instance-id i-023a2e92f3ea873ec --private-key-file ./Login-1.pem --region us-east-1
 
 // First we create VPC for the EMR Cluster
 module "vpc" {
@@ -212,6 +219,10 @@ module "vpc" {
   }
 }
 
+########################
+#     ENDPOINTS        #
+########################
+
 // Endpoint for the VPC to allow EMR to access S3 over private network
 module "vpc_endpoint" {
   source = "./.terraform/modules/vpc/modules/vpc-endpoints"
@@ -225,7 +236,7 @@ module "vpc_endpoint" {
       service_type    = "Gateway"
       private_dns_enabled = true
       route_table_ids = flatten([module.vpc.private_route_table_ids])
-      // policy          = data.aws_iam_policy_document.generic_s3_policy.json
+      policy          = data.aws_iam_policy_document.generic_s3_policy.json
       tags            = { Name = "${local.vpc_name}-s3" }
     }
     },
@@ -247,12 +258,6 @@ module "vpc_endpoint" {
 
 }
 
-// Endpoint to connect to nodes
-resource "aws_ec2_instance_connect_endpoint" "ec2connect" {
-  subnet_id = element(module.vpc.private_subnets, 0)
-  security_group_ids = [ module.ec2connect_endpoints_sg.security_group_id ]
-  tags = var.tags
-}
 
 module "vpc_endpoints_sg" {
   source  = "terraform-aws-modules/security-group/aws"
@@ -286,39 +291,6 @@ module "vpc_endpoints_sg" {
   tags = var.tags
 }
 
-module "ec2connect_endpoints_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 5.0"
-
-  name        = "${local.name}-ec2connect-endpoints"
-  description = "Security group for VPC endpoint access for EC2 instances"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_with_cidr_blocks = [
-    {
-      description = "All ingress"
-      cidr_blocks = "0.0.0.0/0"
-      from_port = "0"
-      to_port = "0"
-      protocol = "-1"
-    },
-  ]
-
-  egress_with_cidr_blocks = [ 
-    {
-      description = "All outbound ok for testing"
-      cidr_blocks = "0.0.0.0/0"
-      from_port = "0"
-      to_port = "0"
-      protocol = "-1"
-    }
-   ]
-
-  tags = var.tags
-}
-
-
-
 // Allow if request coming from VPC network
 data "aws_iam_policy_document" "generic_s3_policy" {
   statement {
@@ -336,6 +308,10 @@ data "aws_iam_policy_document" "generic_s3_policy" {
     }
   }
 }
+
+########################
+#       BUCKET         #
+########################
 
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
