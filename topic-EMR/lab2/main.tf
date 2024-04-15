@@ -93,25 +93,25 @@ module "emr_instance_group" {
   vpc_id               = module.vpc.vpc_id
   is_private_cluster   = false
 
-  # master_security_group_rules = {
-  #   "rule1" = {
-  #     description      = "Allow all egress traffic"
-  #     type             = "egress"
-  #     from_port        = 0
-  #     to_port          = 0
-  #     protocol         = "-1"
-  #     cidr_blocks      = ["0.0.0.0/0"]
-  #     ipv6_cidr_blocks = ["::/0"]
-  #   },
-  #   "rule2" = {
-  #     description      = "Allow ssh ingress traffic"
-  #     type             = "egress"
-  #     from_port        = 22
-  #     to_port          = 22
-  #     protocol         = "tcp"
-  #     cidr_blocks      = ["0.0.0.0/0"]
-  #   }
-  # }
+  master_security_group_rules = {
+    "rule1" = {
+      description      = "Allow all egress traffic"
+      type             = "egress"
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    },
+    "rule2" = {
+      description      = "Allow ssh ingress traffic"
+      type             = "ingress"
+      from_port        = 22
+      to_port          = 22
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+    }
+  }
   
   keep_job_flow_alive_when_no_steps = true
   list_steps_states                 = ["PENDING", "RUNNING", "CANCEL_PENDING", "CANCELLED", "FAILED", "INTERRUPTED", "COMPLETED"]
