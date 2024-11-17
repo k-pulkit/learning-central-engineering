@@ -4,20 +4,10 @@
         "dockerfile": "Dockerfile"
     },
     "features": {
-    "ghcr.io/devcontainers/features/sshd:1": {
-        "version": "latest"
-    }
-   },
-    "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
-    "extensions": [
-        "scala-lang.scala",
-        "ms-azuretools.vscode-docker",
-        "redhat.java",
-        "github.copilot" // Optional
-    ],
-    "postCreateCommand": "./.devcontainer/setup-spark.sh",
+    "additionalProperties": {},
+    "postCreateCommand": "bash ./.devcontainer/setup-spark.sh",
     "forwardPorts": [4040, 7077, 8080],
-    "remoteUser": "vscode"
+    "remoteUser": "pulkit"
 }
