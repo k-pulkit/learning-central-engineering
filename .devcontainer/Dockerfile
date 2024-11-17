@@ -1,5 +1,5 @@
 # Base image with Java and Ubuntu
-FROM mcr.microsoft.com/devcontainers/java:0-17
+FROM mcr.microsoft.com/devcontainers/java:11
 
 # Set environment variables for Spark
 ENV SCALA_VERSION=2.12.17 \
