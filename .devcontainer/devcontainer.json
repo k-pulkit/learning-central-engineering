@@ -9,5 +9,5 @@
     "additionalProperties": {},
     "postCreateCommand": "bash ./.devcontainer/setup-spark.sh",
     "forwardPorts": [4040, 7077, 8080],
-    "remoteUser": "pulkit"
+    "remoteUser": "codespace"
 }
