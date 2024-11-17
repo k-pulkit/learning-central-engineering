@@ -3,7 +3,7 @@ FROM openjdk:11-jdk-slim
 
 # Set environment variables for Spark
 ENV SCALA_VERSION=2.12.17 \
-    SPARK_VERSION=3.3.2 \
+    SPARK_VERSION=3.3.0 \
     HADOOP_VERSION=3 \
     SPARK_HOME=/opt/spark \
     PATH="$PATH:/opt/spark/bin:/opt/spark/sbin"
@@ -25,7 +25,7 @@ RUN curl -s https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA
     dpkg -i scala.deb && rm scala.deb
 
 # Install Spark
-RUN curl -sL https://downloads.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz | \
+RUN curl -sL https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz | \
     tar -xz -C /opt && mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/spark
 
 # Set working directory
