@@ -9,4 +9,4 @@ mkdir -p /opt/spark/logs
 export SPARK_LOCAL_IP=127.0.0.1
 export SPARK_MASTER_HOST=127.0.0.1
 
-echo "Spark setup complete."
+echo "Local Spark setup complete."

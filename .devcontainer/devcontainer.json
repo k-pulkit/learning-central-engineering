@@ -11,7 +11,7 @@
         }
     },
     "additionalProperties": {},
-    "postCreateCommand": "pwd",
+    "postCreateCommand": "bash .devcontainer/post_create.sh",
     "forwardPorts": [9091, 9092, 4040],
     "remoteUser": "root"
 }
