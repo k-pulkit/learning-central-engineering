@@ -12,6 +12,6 @@
     },
     "additionalProperties": {},
     "postCreateCommand": "bash ./.devcontainer/setup-spark.sh",
-    "forwardPorts": [4040, 7077, 8080],
+    "forwardPorts": [9090, 4040, 4041, 7077, 8080],
     "remoteUser": "root"
 }

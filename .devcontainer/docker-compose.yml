@@ -5,7 +5,6 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/codespace.docker
-    command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
       - ..:/workspace:cached
   spark-master:
@@ -15,12 +14,12 @@ services:
     ports:
       - "9090:8080"
       - "7077:7077"
+      - "4041:4040"
     volumes:
        - ..:/workspace:cached
     environment:
       - SPARK_LOCAL_IP=spark-master
       - SPARK_WORKLOAD=master
-    network_mode: service:codespace
   spark-worker-a:
     build: 
       context: ..
@@ -41,4 +40,3 @@ services:
     volumes:
        - ./apps:/opt/spark-apps
        - ./data:/opt/spark-data
-    network_mode: service:codespace
