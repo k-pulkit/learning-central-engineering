@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  codespace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/codespace.docker
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ..:/workspace:cached
+  spark-master:
+    build: 
+      context: ..
+      dockerfile: .devcontainer/spark.docker
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+    volumes:
+       - ..:/workspace:cached
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+    network_mode: service:codespace
+  spark-worker-a:
+    build: 
+      context: ..
+      dockerfile: .devcontainer/spark.docker
+    ports:
+      - "9091:8080"
+      - "7000:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+       - ./apps:/opt/spark-apps
+       - ./data:/opt/spark-data
+    network_mode: service:codespace
