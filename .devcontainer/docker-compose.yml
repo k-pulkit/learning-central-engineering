@@ -7,16 +7,3 @@ services:
       dockerfile: .devcontainer/codespace.docker
     volumes:
       - ..:/workspace:cached
-  spark-master:
-    build: 
-      context: ..
-      dockerfile: .devcontainer/spark.docker
-    ports:
-      - "9090:8080"
-      - "7077:7077"
-      - "4041:4040"
-    volumes:
-       - ..:/workspace:cached
-    environment:
-      - SPARK_LOCAL_IP=spark-master
-      - SPARK_WORKLOAD=master
