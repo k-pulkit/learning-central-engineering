@@ -12,6 +12,6 @@
     },
     "additionalProperties": {},
     "postCreateCommand": "pwd",
-    "forwardPorts": [9091, 7078, 9092, 7001],
+    "forwardPorts": [9091, 9092, 4040],
     "remoteUser": "root"
 }
