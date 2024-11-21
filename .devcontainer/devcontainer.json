@@ -1,0 +1,17 @@
+{
+    "name": "Scala Spark DevContainer",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "codespace",
+    "workspaceFolder": "/workspace",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/aws-cli:1": {},
+        "ghcr.io/devcontainers/features/sshd:1": {
+            "version": "latest"
+        }
+    },
+    "additionalProperties": {},
+    "postCreateCommand": "bash .devcontainer/post_create.sh",
+    "forwardPorts": [9091, 9092, 4040],
+    "remoteUser": "root"
+}

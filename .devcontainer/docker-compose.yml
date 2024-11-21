@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  codespace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/codespace.docker
+    volumes:
+      - ..:/workspace:cached
+    command: tail -f /dev/null
+  spark-master:
+    build: 
+      context: ..
+      dockerfile: .devcontainer/spark.docker
+    ports:
+      - "9091:8080"
+      - "7078:7077"
+    volumes:
+       - ..:/workspace:cached
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+  spark-worker-a:
+    build: 
+      context: ..
+      dockerfile: .devcontainer/spark.docker
+    ports:
+      - "9092:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+       - ..:/workspace:cached
