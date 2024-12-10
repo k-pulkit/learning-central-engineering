@@ -1,0 +1,15 @@
+services:
+  glue-local:
+    image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
+    tty: true
+    working_dir: /home/glue_user/workspace
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - DISABLE_SSL=true
+    volumes:
+      - ./app:/home/glue_user/workspace:ro
+    ports:
+      - "2080:18080"
+      - "2040:4040"
+    command: -c "aws s3 ls"

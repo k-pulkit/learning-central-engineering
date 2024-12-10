@@ -1,0 +1,4 @@
+[submodule "data.io-free-bootcamp/reference-handbook-material"]
+	path = data.io-free-bootcamp/reference-handbook-material
+	url = https://github.com/DataExpert-io/data-engineer-handbook.git
+	branch = main
